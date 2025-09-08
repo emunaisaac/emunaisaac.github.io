@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVision Pro - Camera Monitoring System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #dc2626;
+            --accent: #059669;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --dark: #f8fafc;
+            --dark-light: #cbd5e1;
+            --light: #0f172a;
+            --gray: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            font-weight: 500;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--dark-light);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .section {
+            background-color: var(--light);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            background: none;
+            border: 1px solid var(--gray);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .view-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Camera Grid */
+        .cameras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .camera-card {
+            background-color: var(--light);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .camera-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .camera-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .camera-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-online {
+            background-color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background-color: var(--danger);
+        }
+
+        .status-recording {
+            background-color: var(--warning);
+            animation: blink 1s infinite;
+        }
+
+        .camera-feed {
+            position: relative;
+            height: 200px;
+            background-color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .camera-placeholder {
+            color: var(--gray);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .camera-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .camera-controls {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Alerts Section */
+        .alerts-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 1rem;
+            border-left: 4px solid var(--gray);
+            margin-bottom: 0.8rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .alert-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .alert-item.critical {
+            border-left-color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .alert-item.warning {
+            border-left-color: var(--warning);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .alert-item.info {
+            border-left-color: var(--primary);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-type {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-time {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .alert-details {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .alert-camera {
+            font-weight: 500;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .alert-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        .alert-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* History Section */
+        .history-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .history-table th {
+            background-color: rgba(0, 0, 0, 0.03);
+            font-weight: 600;
+        }
+
+        .history-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        /* Settings Section */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .settings-card {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .settings-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .setting-item {
+            margin-bottom: 1.2rem;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .toggle-container .slider {
+            background-color: var(--gray);
+        }
+
+        .toggle-container input:checked + .slider {
+            background-color: var(--success);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dark mode adjustments */
+        body.dark-mode .section,
+        body.dark-mode .camera-card,
+        body.dark-mode .settings-card {
+            background-color: var(--dark-light);
+            color: var(--dark);
+        }
+
+        body.dark-mode .stat-card {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .cameras-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .header-controls {
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section {
+                padding: 1rem;
+            }
+            
+            .cameras-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .camera-feed {
+                height: 180px;
+            }
+            
+            .history-filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Navigation -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-video"></i>
+            <span><a href="index.html">SecureVision Pro</a></span>
+        </div>
+        
+        <nav>
+            <a href="#" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#"><i class="fas fa-video"></i> Cameras</a>
+            <a href="#"><i class="fas fa-bell"></i> Alerts</a>
+            <a href="#"><i class="fas fa-history"></i> History</a>
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+        
+        <div class="header-controls">
+            <div class="toggle-label">
+                <i class="fas fa-moon"></i>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+                <i class="fas fa-sun"></i>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">JS</div>
+                <span>John Smith</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-th-large"></i> System Overview</h2>
+                <div class="view-controls">
+                    <button class="view-btn active"><i class="fas fa-grip-horizontal"></i> Grid</button>
+                    <button class="view-btn"><i class="fas fa-list"></i> List</button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-video"></i></div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Total Cameras</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Online Cameras</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Active Alerts</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-hdd"></i></div>
+                    <div class="stat-value">78%</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cameras Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-video"></i> Camera Feeds</h2>
+                <div class="view-controls">
+                    <button class="view-btn active"><i class="fas fa-grip-horizontal"></i> Grid</button>
+                    <button class="view-btn"><i class="fas fa-list"></i> List</button>
+                </div>
+            </div>
+            
+            <div class="cameras-grid">
+                <!-- Camera 1 -->
+                <div class="camera-card">
+                    <div class="camera-header">
+                        <div class="camera-name">
+                            <i class="fas fa-video"></i> Front Entrance
+                        </div>
+                        <div class="camera-status">
+                            <span class="status-indicator status-online"></span>
+                            <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="camera-feed">
+                        <div class="camera-placeholder">
+                            <i class="fas fa-video"></i>
+                            <p>Front Entrance Camera Feed</p>
+                        </div>
+                    </div>
+                    <div class="camera-controls">
+                        <button class="control-btn" title="Full Screen"><i class="fas fa-expand"></i></button>
+                        <button class="control-btn" title="Record"><i class="fas fa-record-vinyl"></i></button>
+                        <button class="control-btn" title="Take Snapshot"><i class="fas fa-camera"></i></button>
+                        <button class="control-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Camera 2 -->
+                <div class="camera-card">
+                    <div class="camera-header">
+                        <div class="camera-name">
+                            <i class="fas fa-video"></i> Parking Lot
+                        </div>
+                        <div class="camera-status">
+                            <span class="status-indicator status-recording"></span>
+                            <span>Recording</span>
+                        </div>
+                    </div>
+                    <div class="camera-feed">
+                        <div class="camera-placeholder">
+                            <i class="fas fa-video"></i>
+                            <p>Parking Lot Camera Feed</p>
+                        </div>
+                    </div>
+                    <div class="camera-controls">
+                        <button class="control-btn" title="Full Screen"><i class="fas fa-expand"></i></button>
+                        <button class="control-btn" title="Stop Recording"><i class="fas fa-stop"></i></button>
+                        <button class="control-btn" title="Take Snapshot"><i class="fas fa-camera"></i></button>
+                        <button class="control-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Camera 3 -->
+                <div class="camera-card">
+                    <div class="camera-header">
+                        <div class="camera-name">
+                            <i class="fas fa-video"></i> Back Entrance
+                        </div>
+                        <div class="camera-status">
+                            <span class="status-indicator status-offline"></span>
+                            <span>Offline</span>
+                        </div>
+                    </div>
+                    <div class="camera-feed">
+                        <div class="camera-placeholder">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Camera Offline</p>
+                        </div>
+                    </div>
+                    <div class="camera-controls">
+                        <button class="control-btn" title="Reconnect" disabled><i class="fas fa-sync"></i></button>
+                        <button class="control-btn" title="Settings" disabled><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Camera 4 -->
+                <div class="camera-card">
+                    <div class="camera-header">
+                        <div class="camera-name">
+                            <i class="fas fa-video"></i> Main Hall
+                        </div>
+                        <div class="camera-status">
+                            <span class="status-indicator status-online"></span>
+                            <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="camera-feed">
+                        <div class="camera-placeholder">
+                            <i class="fas fa-video"></i>
+                            <p>Main Hall Camera Feed</p>
+                        </div>
+                    </div>
+                    <div class="camera-controls">
+                        <button class="control-btn" title="Full Screen"><i class="fas fa-expand"></i></button>
+                        <button class="control-btn" title="Record"><i class="fas fa-record-vinyl"></i></button>
+                        <button class="control-btn" title="Take Snapshot"><i class="fas fa-camera"></i></button>
+                        <button class="control-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Alerts Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-bell"></i> Recent Alerts</h2>
+                <button class="btn-primary">View All Alerts</button>
+            </div>
+            
+            <div class="alerts-container">
+                <div class="alert-item critical">
+                    <div class="alert-header">
+                        <div class="alert-type">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Critical: Motion Detected
+                        </div>
+                        <div class="alert-time">10:42 AM</div>
+                    </div>
+                    <div class="alert-details">
+                        <div class="alert-camera">Front Entrance Camera</div>
+                        <div class="alert-actions">
+                            <button class="alert-btn">View</button>
+                            <button class="alert-btn">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-item warning">
+                    <div class="alert-header">
+                        <div class="alert-type">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Camera Offline
+                        </div>
+                        <div class="alert-time">09:15 AM</div>
+                    </div>
+                    <div class="alert-details">
+                        <div class="alert-camera">Back Entrance Camera</div>
+                        <div class="alert-actions">
+                            <button class="alert-btn">Reconnect</button>
+                            <button class="alert-btn">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-item info">
+                    <div class="alert-header">
+                        <div class="alert-type">
+                            <i class="fas fa-info-circle"></i>
+                            Recording Started
+                        </div>
+                        <div class="alert-time">08:30 AM</div>
+                    </div>
+                    <div class="alert-details">
+                        <div class="alert-camera">Parking Lot Camera</div>
+                        <div class="alert-actions">
+                            <button class="alert-btn">View</button>
+                            <button class="alert-btn">Stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-history"></i> Event History</h2>
+            </div>
+            
+            <div class="history-filters">
+                <div class="filter-group">
+                    <label class="filter-label">Date Range</label>
+                    <select class="filter-select">
+                        <option>Last 24 Hours</option>
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>Custom Range</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Camera</label>
+                    <select class="filter-select">
+                        <option>All Cameras</option>
+                        <option>Front Entrance</option>
+                        <option>Parking Lot</option>
+                        <option>Back Entrance</option>
+                        <option>Main Hall</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Event Type</label>
+                    <select class="filter-select">
+                        <option>All Events</option>
+                        <option>Motion Detected</option>
+                        <option>Recording</option>
+                        <option>Camera Offline</option>
+                        <option>Snapshot</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">&nbsp;</label>
+                    <button class="btn-primary">Apply Filters</button>
+                </div>
+            </div>
+            
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Camera</th>
+                        <th>Event</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10:42 AM</td>
+                        <td>Front Entrance</td>
+                        <td>Motion Detected</td>
+                        <td><button class="alert-btn">View Recording</button></td>
+                    </tr>
+                    <tr>
+                        <td>09:15 AM</td>
+                        <td>Back Entrance</td>
+                        <td>Camera Offline</td>
+                        <td><button class="alert-btn">View Details</button></td>
+                    </tr>
+                    <tr>
+                        <td>08:30 AM</td>
+                        <td>Parking Lot</td>
+                        <td>Recording Started</td>
+                        <td><button class="alert-btn">Stop Recording</button></td>
+                    </tr>
+                    <tr>
+                        <td>08:00 AM</td>
+                        <td>Main Hall</td>
+                        <td>Snapshot Taken</td>
+                        <td><button class="alert-btn">View Snapshot</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-cog"></i> System Settings</h2>
+            </div>
+            
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h3 class="settings-header"><i class="fas fa-bell"></i> Alert Settings</h3>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Motion Sensitivity</label>
+                        <input type="range" class="setting-input" min="1" max="10" value="7">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Email Notifications</label>
+                        <div class="toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Enabled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Alert Sound</label>
+                        <select class="setting-input">
+                            <option>Default</option>
+                            <option>Beep</option>
+                            <option>Chime</option>
+                            <option>None</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3 class="settings-header"><i class="fas fa-record-vinyl"></i> Recording Settings</h3>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Auto Record on Motion</label>
+                        <div class="toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Enabled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Retention Period</label>
+                        <select class="setting-input">
+                            <option>7 Days</option>
+                            <option>14 Days</option>
+                            <option>30 Days</option>
+                            <option>90 Days</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Video Quality</label>
+                        <select class="setting-input">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Ultra</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3 class="settings-header"><i class="fas fa-user-shield"></i> Security Settings</h3>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Auto Logout</label>
+                        <div class="toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Enabled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Two-Factor Authentication</label>
+                        <div class="toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Enabled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">Session Timeout</label>
+                        <select class="setting-input">
+                            <option>15 Minutes</option>
+                            <option>30 Minutes</option>
+                            <option>1 Hour</option>
+                            <option>Never</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn-primary">Save Settings</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+                <a href="#">Documentation</a>
+            </div>
+            <div class="copyright">
+                &copy; 2023 SecureVision Pro. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            // Save user preference
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+        
+        // Check for saved user preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+        
+        // Simulate loading states
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const originalHtml = this.innerHTML;
+                this.innerHTML = '<span class="loading-spinner"></span>';
+                
+                // Simulate action taking time
+                setTimeout(() => {
+                    this.innerHTML = originalHtml;
+                }, 1500);
+            });
+        });
+        
+        // Simulate camera status changes (for demo purposes)
+        setInterval(() => {
+            const statusIndicators = document.querySelectorAll('.status-indicator');
+            statusIndicators.forEach(indicator => {
+                if (Math.random() > 0.8) {
+                    indicator.classList.toggle('status-online');
+                    indicator.classList.toggle('status-offline');
+                }
+            });
+        }, 10000);
+    </script>
+</body>
+</html>

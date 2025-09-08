@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotspot Voucher System with QR</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{font-family:'Roboto',sans-serif;margin:0;padding:0;background:#f4f6f9;color:#333;}
+header{background:#3498db;color:#fff;padding:20px;text-align:center;font-size:24px;font-weight:700;}
+.container{max-width:1000px;margin:40px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.1);}
+h2{text-align:center;color:#3498db;margin-bottom:30px;}
+form{display:flex;flex-direction:column;gap:15px;}
+input{padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px;}
+button{padding:12px;background:#3498db;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:0.3s;}
+button:hover{background:#2980b9;}
+#voucherList{margin-top:30px;}
+.voucher-card{padding:15px;border:1px solid #3498db;border-radius:8px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;background:#eaf2f8;flex-wrap:wrap;}
+.voucher-info{flex:1;}
+.voucher-info span{font-weight:700;}
+.voucher-active{color:green;}
+.voucher-expired{color:red;}
+.qrcode{margin-left:20px;}
+.print-btn{background:#f1c40f;color:#fff;margin-top:10px;}
+.print-btn:hover{background:#d4ac0d;}
+@media(max-width:768px){
+.voucher-card{flex-direction:column;align-items:flex-start;}
+.qrcode{margin-left:0;margin-top:10px;}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html"><header>Hotspot Voucher System with QR Codes</header></a>
+
+<div class="container">
+<h2>Generate New Voucher</h2>
+<form id="voucherForm">
+<label>Validity (Hours)</label>
+<input type="number" id="validity" min="1" max="24" value="1" required>
+<label>Bandwidth Limit (MB)</label>
+<input type="number" id="bandwidth" min="50" value="500" required>
+<button type="submit">Generate Voucher</button>
+</form>
+
+<div id="voucherList">
+<h2>Generated Vouchers</h2>
+</div>
+</div>
+
+<script>
+// Voucher storage
+let vouchers = [];
+
+// Generate unique code
+function generateCode(length=8){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code='';
+  for(let i=0;i<length;i++){
+    code+=chars.charAt(Math.floor(Math.random()*chars.length));
+  }
+  return code;
+}
+
+// Render vouchers
+function renderVouchers(){
+  const container=document.getElementById('voucherList');
+  container.innerHTML='<h2>Generated Vouchers</h2>';
+  vouchers.forEach((v,i)=>{
+    const card=document.createElement('div');
+    card.className='voucher-card';
+    const status=(new Date() < v.expiry) ? '<span class="voucher-active">Active</span>' : '<span class="voucher-expired">Expired</span>';
+    card.innerHTML=`<div class="voucher-info">
+      <div><strong>Code:</strong> ${v.code}</div>
+      <div><strong>Validity:</strong> ${v.validity}h | <strong>Bandwidth:</strong> ${v.bandwidth}MB</div>
+      <div>Status: ${status}</div>
+      <button class="print-btn" onclick="printVoucher(${i})">Print Voucher</button>
+    </div>
+    <div id="qrcode${i}" class="qrcode"></div>`;
+    container.appendChild(card);
+    new QRCode(document.getElementById("qrcode"+i), {text:v.code,width:80,height:80});
+  });
+}
+
+// Print voucher
+function printVoucher(index){
+  const v=vouchers[index];
+  const voucherWindow=window.open('','Print Voucher','width=300,height=400');
+  voucherWindow.document.write(`<h2>Hotspot Voucher</h2>
+  <p><strong>Code:</strong> ${v.code}</p>
+  <p><strong>Validity:</strong> ${v.validity} hour(s)</p>
+  <p><strong>Bandwidth:</strong> ${v.bandwidth} MB</p>
+  <p><strong>Status:</strong> ${(new Date() < v.expiry)?'Active':'Expired'}</p>
+  <div id="qrcode"></div>`);
+  const qr=new voucherWindow.document.createElement('div');
+  voucherWindow.document.body.appendChild(qr);
+  new QRCode(voucherWindow.document.getElementById("qrcode"), {text:v.code,width:120,height:120});
+  voucherWindow.print();
+}
+
+// Handle form submission
+document.getElementById('voucherForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const validity=parseInt(document.getElementById('validity').value);
+  const bandwidth=parseInt(document.getElementById('bandwidth').value);
+  const code=generateCode(8);
+  const expiry=new Date(Date.now() + validity*60*60*1000);
+  vouchers.push({code, validity, bandwidth, expiry});
+  renderVouchers();
+  alert(`Voucher Generated!\nCode: ${code}\nSimulated Router Access Activated`);
+});
+
+// Auto-update voucher status
+setInterval(renderVouchers,60000);
+</script>
+
+</body>
+</html>

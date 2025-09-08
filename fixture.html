@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Football Fixture Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #dc2626;
+            --accent: #059669;
+            --dark: #1f2937;
+            --light: #f8fafc;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .fixture-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .fixture-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fixture-card.upcoming {
+            border-left-color: var(--accent);
+            background: linear-gradient(to right, #f0fdf4, white);
+        }
+        
+        .team-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 2px;
+            font-weight: 500;
+        }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .team-color-1 { background: linear-gradient(45deg, #3b82f6, #1d4ed8); color: white; }
+        .team-color-2 { background: linear-gradient(45deg, #ef4444, #b91c1c); color: white; }
+        .team-color-3 { background: linear-gradient(45deg, #10b981, #047857); color: white; }
+        .team-color-4 { background: linear-gradient(45deg, #f59e0b, #d97706); color: white; }
+        .team-color-5 { background: linear-gradient(45deg, #8b5cf6, #7c3aed); color: white; }
+        .team-color-6 { background: linear-gradient(45deg, #ec4899, #db2777); color: white; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fixture {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        
+        .drag-handle:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <img src="https://placehold.co/50x50" alt="Football fixture generator logo with calendar and football design" class="h-10 w-10 rounded-lg">
+                    <div>
+                        <h1 class="text-2xl font-bold">FixtureMaster Pro</h1>
+                        <p class="text-blue-100 text-sm">Advanced Football Schedule Generator</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="saveFixtures" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50">
+                        <i class="fas fa-save mr-2"></i>Save Fixtures
+                    </button>
+                    <button id="resetAll" class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600">
+                        <i class="fas fa-trash mr-2"></i>Reset All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Teams Input Section -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky-header">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Team Management</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Add Teams</label>
+                        <div class="flex space-x-2">
+                            <input type="text" id="teamInput" placeholder="Enter team name" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <button id="addTeam" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Enter team names one by one or paste a list</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Teams</label>
+                        <div id="teamsList" class="space-y-2 max-h-60 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+                            <!-- Teams will be added here -->
+                            <div class="text-center text-gray-500 py-4" id="noTeamsMessage">
+                                <i class="fas fa-users text-2xl mb-2 text-gray-300"></i>
+                                <p>No teams added yet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button id="generateFixtures" class="bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-cog mr-2"></i>Generate Fixtures
+                        </button>
+                        <button id="clearTeams" class="bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-times mr-2"></i>Clear Teams
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">Quick Setup</h3>
+                        <div class="space-y-2">
+                            <button class="w-full text-left text-sm text-blue-600 hover:text-blue-800" data-league="premier">
+                                Premier League Teams
+                            </button>
+                            <button class="w-full text-left text-sm text-blue-600 hover:text-blue-800" data-league="la-liga">
+                                La Liga Teams
+                            </button>
+                            <button class="w-full text-left text-sm text-blue-600 hover:text-blue-800" data-league="bundesliga">
+                                Bundesliga Teams
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixtures Display Section -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 sm:mb-0">Fixture Schedule</h2>
+                        
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <select id="filterTeam" class="pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Teams</option>
+                                    <!-- Team options will be added here -->
+                                </select>
+                            </div>
+                            <div class="relative">
+                                <select id="filterRound" class="pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Rounds</option>
+                                    <!-- Round options will be added here -->
+                                </select>
+                            </div>
+                            <button id="exportBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                                <i class="fas fa-download mr-2"></i>Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="fixtureStats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="totalMatches">0</div>
+                            <div class="text-sm text-gray-600">Total Matches</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-green-600" id="upcomingMatches">0</div>
+                            <div class="text-sm text-gray-600">Upcoming</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="totalRounds">0</div>
+                            <div class="text-sm text-gray-600">Rounds</div>
+                        </div>
+                    </div>
+
+                    <div id="fixturesContainer" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500" id="noFixturesMessage">
+                            <i class="fas fa-calendar-alt text-4xl mb-4 text-gray-300"></i>
+                            <h3 class="text-lg font-semibold mb-2">No Fixtures Generated</h3>
+                            <p>Add teams and click "Generate Fixtures" to create a schedule</p>
+                        </div>
+                        <!-- Fixtures will be added here -->
+                    </div>
+
+                    <!-- Calendar View (Hidden by default) -->
+                    <div id="calendarView" class="mt-6 hidden">
+                        <h3 class="text-lg font-semibold mb-4">Calendar View</h3>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Calendar items will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Fixture Modal -->
+    <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Edit Match</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Match Date</label>
+                    <input type="date" id="editDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Match Time</label>
+                    <input type="time" id="editTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                    <input type="text" id="editVenue" placeholder="Stadium name" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                
+                <div class="flex space-x-3 pt-4">
+                    <button id="saveEdit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        Save Changes
+                    </button>
+                    <button id="cancelEdit" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        const state = {
+            teams: [],
+            fixtures: [],
+            currentEditId: null,
+            teamColors: {}
+        };
+
+        // DOM Elements
+        const elements = {
+            teamInput: document.getElementById('teamInput'),
+            addTeam: document.getElementById('addTeam'),
+            teamsList: document.getElementById('teamsList'),
+            noTeamsMessage: document.getElementById('noTeamsMessage'),
+            generateFixtures: document.getElementById('generateFixtures'),
+            clearTeams: document.getElementById('clearTeams'),
+            fixturesContainer: document.getElementById('fixturesContainer'),
+            noFixturesMessage: document.getElementById('noFixturesMessage'),
+            filterTeam: document.getElementById('filterTeam'),
+            filterRound: document.getElementById('filterRound'),
+            saveFixtures: document.getElementById('saveFixtures'),
+            resetAll: document.getElementById('resetAll'),
+            editModal: document.getElementById('editModal'),
+            closeModal: document.getElementById('closeModal'),
+            saveEdit: document.getElementById('saveEdit'),
+            cancelEdit: document.getElementById('cancelEdit'),
+            totalMatches: document.getElementById('totalMatches'),
+            upcomingMatches: document.getElementById('upcomingMatches'),
+            totalRounds: document.getElementById('totalRounds')
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+            setupEventListeners();
+            updateUI();
+        });
+
+        function setupEventListeners() {
+            // Team management
+            elements.addTeam.addEventListener('click', addTeam);
+            elements.teamInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTeam();
+            });
+            elements.clearTeams.addEventListener('click', clearTeams);
+            elements.generateFixtures.addEventListener('click', generateFixtures);
+            
+            // Fixture management
+            elements.filterTeam.addEventListener('change', filterFixtures);
+            elements.filterRound.addEventListener('change', filterFixtures);
+            elements.saveFixtures.addEventListener('click', saveToLocalStorage);
+            elements.resetAll.addEventListener('click', resetApplication);
+            
+            // Modal management
+            elements.closeModal.addEventListener('click', closeModal);
+            elements.cancelEdit.addEventListener('click', closeModal);
+            elements.saveEdit.addEventListener('click', saveFixtureEdit);
+            
+            // Quick setup buttons
+            document.querySelectorAll('[data-league]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const league = e.target.dataset.league;
+                    loadPresetTeams(league);
+                });
+            });
+            
+            // Export functionality
+            document.getElementById('exportBtn').addEventListener('click', exportFixtures);
+        }
+
+        function addTeam() {
+            const teamName = elements.teamInput.value.trim();
+            if (!teamName) return;
+            
+            if (state.teams.includes(teamName)) {
+                showNotification('Team already exists!', 'error');
+                return;
+            }
+            
+            state.teams.push(teamName);
+            elements.teamInput.value = '';
+            updateUI();
+            saveToLocalStorage();
+            showNotification(`Added team: ${teamName}`, 'success');
+        }
+
+        function removeTeam(teamName) {
+            state.teams = state.teams.filter(team => team !== teamName);
+            updateUI();
+            saveToLocalStorage();
+            showNotification(`Removed team: ${teamName}`, 'info');
+        }
+
+        function clearTeams() {
+            state.teams = [];
+            state.fixtures = [];
+            updateUI();
+            saveToLocalStorage();
+        }
+
+        function generateFixtures() {
+            if (state.teams.length < 2) {
+                showNotification('Need at least 2 teams to generate fixtures', 'error');
+                return;
+            }
+            
+            // Generate round-robin fixtures
+            state.fixtures = [];
+            const totalTeams = state.teams.length;
+            
+            // Create home and away matches for each pair
+            for (let i = 0; i < totalTeams; i++) {
+                for (let j = i + 1; j < totalTeams; j++) {
+                    // Home match
+                    state.fixtures.push(createFixture(state.teams[i], state.teams[j], true));
+                    // Away match (return fixture)
+                    state.fixtures.push(createFixture(state.teams[j], state.teams[i], false));
+                }
+            }
+            
+            // Schedule matches intelligently (no team plays twice on same day)
+            scheduleMatches();
+            
+            updateUI();
+            saveToLocalStorage();
+            showNotification('Fixtures generated successfully!', 'success');
+        }
+
+        function createFixture(homeTeam, awayTeam, isHome) {
+            const now = new Date();
+            const id = Date.now() + Math.random().toString(36).substr(2, 9);
+            
+            return {
+                id,
+                homeTeam,
+                awayTeam,
+                date: '',
+                time: '',
+                venue: isHome ? `${homeTeam} Stadium` : `${awayTeam} Stadium`,
+                round: 0,
+                status: 'scheduled'
+            };
+        }
+
+        function scheduleMatches() {
+            // Group by round and ensure no team plays twice in same round
+            const rounds = Math.ceil(state.fixtures.length / (state.teams.length / 2));
+            const matchesPerRound = Math.floor(state.teams.length / 2);
+            
+            let currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 1); // Start from tomorrow
+            
+            let fixtureIndex = 0;
+            
+            for (let round = 1; round <= rounds; round++) {
+                const roundFixtures = [];
+                const scheduledTeams = new Set();
+                
+                // Schedule matches for this round
+                for (let i = 0; i < matchesPerRound && fixtureIndex < state.fixtures.length; i++) {
+                    let fixture = state.fixtures[fixtureIndex];
+                    
+                    // Find a fixture where neither team is scheduled in this round
+                    let suitableFixture = null;
+                    for (let j = fixtureIndex; j < state.fixtures.length; j++) {
+                        const testFixture = state.fixtures[j];
+                        if (!scheduledTeams.has(testFixture.homeTeam) && !scheduledTeams.has(testFixture.awayTeam)) {
+                            suitableFixture = testFixture;
+                            // Swap with current position
+                            state.fixtures[j] = state.fixtures[fixtureIndex];
+                            state.fixtures[fixtureIndex] = suitableFixture;
+                            break;
+                        }
+                    }
+                    
+                    if (suitableFixture) {
+                        suitableFixture.date = formatDate(currentDate);
+                        suitableFixture.time = getRandomTime();
+                        suitableFixture.round = round;
+                        scheduledTeams.add(suitableFixture.homeTeam);
+                        scheduledTeams.add(suitableFixture.awayTeam);
+                        roundFixtures.push(suitableFixture);
+                        fixtureIndex++;
+                    }
+                }
+                
+                // Move to next date (typically 3-4 days between rounds)
+                currentDate.setDate(currentDate.getDate() + 3 + Math.floor(Math.random() * 2));
+            }
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function getRandomTime() {
+            const hours = 14 + Math.floor(Math.random() * 6); // 2 PM to 8 PM
+            const minutes = Math.floor(Math.random() * 12) * 5; // Multiples of 5 minutes
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        function updateUI() {
+            updateTeamsList();
+            updateFixturesDisplay();
+            updateStats();
+            updateGenerateButton();
+        }
+
+        function updateTeamsList() {
+            elements.teamsList.innerHTML = '';
+            
+            if (state.teams.length === 0) {
+                elements.teamsList.appendChild(elements.noTeamsMessage);
+                elements.noTeamsMessage.classList.remove('hidden');
+            } else {
+                elements.noTeamsMessage.classList.add('hidden');
+                
+                state.teams.forEach((team, index) => {
+                    const colorClass = `team-color-${(index % 6) + 1}`;
+                    state.teamColors[team] = colorClass;
+                    
+                    const teamElement = document.createElement('div');
+                    teamElement.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+                    teamElement.innerHTML = `
+                        <span class="team-badge ${colorClass}">
+                            <img src="https://placehold.co/24x24" alt="${team} logo" class="w-4 h-4 mr-2 rounded">
+                            ${team}
+                        </span>
+                        <button class="text-red-500 hover:text-red-700 remove-team" data-team="${team}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    elements.teamsList.appendChild(teamElement);
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-team').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const team = e.target.closest('button').dataset.team;
+                        removeTeam(team);
+                    });
+                });
+            }
+            
+            // Update filter dropdown
+            updateFilterOptions();
+        }
+
+        function updateFixturesDisplay() {
+            elements.fixturesContainer.innerHTML = '';
+            
+            if (state.fixtures.length === 0) {
+                elements.fixturesContainer.appendChild(elements.noFixturesMessage);
+                elements.noFixturesMessage.classList.remove('hidden');
+                return;
+            }
+            
+            elements.noFixturesMessage.classList.add('hidden');
+            
+            // Group fixtures by round
+            const rounds = {};
+            state.fixtures.forEach(fixture => {
+                if (!rounds[fixture.round]) {
+                    rounds[fixture.round] = [];
+                }
+                rounds[fixture.round].push(fixture);
+            });
+            
+            // Display fixtures by round
+            Object.keys(rounds).sort().forEach(roundNumber => {
+                const roundFixtures = rounds[roundNumber];
+                
+                const roundSection = document.createElement('div');
+                roundSection.className = 'round-section mb-8';
+                roundSection.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded mr-2">Round ${roundNumber}</span>
+                        <span class="text-gray-600">${roundFixtures[0].date}</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${roundFixtures.map((fixture, index) => createFixtureCard(fixture, index)).join('')}
+                    </div>
+                `;
+                
+                elements.fixturesContainer.appendChild(roundSection);
+            });
+        }
+
+        function createFixtureCard(fixture, index) {
+            const isUpcoming = new Date(fixture.date) > new Date();
+            const homeColor = state.teamColors[fixture.homeTeam] || 'bg-gray-100';
+            const awayColor = state.teamColors[fixture.awayTeam] || 'bg-gray-100';
+            
+            return `
+                <div class="fixture-card bg-white rounded-lg p-4 border border-gray-200 animate-fixture" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="text-sm text-gray-500">${formatDisplayDate(fixture.date)} • ${fixture.time}</div>
+                        <span class="text-xs px-2 py-1 rounded ${isUpcoming ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${isUpcoming ? 'Upcoming' : 'Completed'}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <span class="${homeColor} team-badge px-3 py-2 rounded-l-lg">
+                                <img src="https://placehold.co/28x28" alt="${fixture.homeTeam} logo" class="w-5 h-5 mr-2 rounded">
+                                ${fixture.homeTeam}
+                            </span>
+                            <span class="bg-gray-200 px-3 py-2 font-bold">VS</span>
+                            <span class="${awayColor} team-badge px-3 py-2 rounded-r-lg">
+                                <img src="https://placehold.co/28x28" alt="${fixture.awayTeam} logo" class="w-5 h-5 mr-2 rounded">
+                                ${fixture.awayTeam}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-3">
+                        <i class="fas fa-map-marker-alt mr-2"></i>${fixture.venue}
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Round ${fixture.round}</span>
+                        <button class="edit-fixture text-blue-600 hover:text-blue-800 text-sm" data-id="${fixture.id}">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDisplayDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function updateStats() {
+            const total = state.fixtures.length;
+            const upcoming = state.fixtures.filter(f => new Date(f.date) > new Date()).length;
+            const rounds = new Set(state.fixtures.map(f => f.round)).size;
+            
+            elements.totalMatches.textContent = total;
+            elements.upcomingMatches.textContent = upcoming;
+            elements.totalRounds.textContent = rounds;
+        }
+
+        function updateGenerateButton() {
+            elements.generateFixtures.disabled = state.teams.length < 2;
+            elements.clearTeams.disabled = state.teams.length === 0;
+        }
+
+        function updateFilterOptions() {
+            // Update team filter
+            elements.filterTeam.innerHTML = '<option value="">All Teams</option>';
+            state.teams.forEach(team => {
+                elements.filterTeam.innerHTML += `<option value="${team}">${team}</option>`;
+            });
+            
+            // Update round filter
+            elements.filterRound.innerHTML = '<option value="">All Rounds</option>';
+            const rounds = [...new Set(state.fixtures.map(f => f.round))].sort();
+            rounds.forEach(round => {
+                elements.filterRound.innerHTML += `<option value="${round}">Round ${round}</option>`;
+            });
+        }
+
+        function filterFixtures() {
+            const teamFilter = elements.filterTeam.value;
+            const roundFilter = elements.filterRound.value;
+            
+            // Implementation would filter the displayed fixtures
+            console.log('Filtering by:', { teamFilter, roundFilter });
+            // This would typically hide/show fixture cards based on filters
+        }
+
+        function editFixture(fixtureId) {
+            const fixture = state.fixtures.find(f => f.id === fixtureId);
+            if (!fixture) return;
+            
+            state.currentEditId = fixtureId;
+            document.getElementById('editDate').value = fixture.date;
+            document.getElementById('editTime').value = fixture.time;
+            document.getElementById('editVenue').value = fixture.venue;
+            
+            elements.editModal.classList.remove('hidden');
+        }
+
+        function saveFixtureEdit() {
+            if (!state.currentEditId) return;
+            
+            const fixture = state.fixtures.find(f => f.id === state.currentEditId);
+            if (fixture) {
+                fixture.date = document.getElementById('editDate').value;
+                fixture.time = document.getElementById('editTime').value;
+                fixture.venue = document.getElementById('editVenue').value;
+                
+                updateUI();
+                saveToLocalStorage();
+                closeModal();
+                showNotification('Fixture updated successfully!', 'success');
+            }
+        }
+
+        function closeModal() {
+            elements.editModal.classList.add('hidden');
+            state.currentEditId = null;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('fixtureGenerator_teams', JSON.stringify(state.teams));
+            localStorage.setItem('fixtureGenerator_fixtures', JSON.stringify(state.fixtures));
+            showNotification('Data saved locally', 'info');
+        }
+
+        function loadFromLocalStorage() {
+            const savedTeams = localStorage.getItem('fixtureGenerator_teams');
+            const savedFixtures = localStorage.getItem('fixtureGenerator_fixtures');
+            
+            if (savedTeams) {
+                state.teams = JSON.parse(savedTeams);
+            }
+            
+            if (savedFixtures) {
+                state.fixtures = JSON.parse(savedFixtures);
+            }
+            
+            updateUI();
+        }
+
+        function resetApplication() {
+            if (confirm('Are you sure you want to reset everything? This cannot be undone.')) {
+                state.teams = [];
+                state.fixtures = [];
+                localStorage.removeItem('fixtureGenerator_teams');
+                localStorage.removeItem('fixtureGenerator_fixtures');
+                updateUI();
+                showNotification('Application reset successfully', 'info');
+            }
+        }
+
+        function exportFixtures() {
+            if (state.fixtures.length === 0) {
+                showNotification('No fixtures to export', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(state.fixtures, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'fixtures.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Fixtures exported successfully', 'success');
+        }
+
+        function loadPresetTeams(league) {
+            const presets = {
+                'premier': ['Arsenal', 'Chelsea', 'Liverpool', 'Manchester City', 'Manchester United', 'Tottenham'],
+                'la-liga': ['Barcelona', 'Real Madrid', 'Atletico Madrid', 'Sevilla', 'Valencia', 'Villarreal'],
+                'bundesliga': ['Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Bayer Leverkusen', 'Wolfsburg', 'Eintracht Frankfurt']
+            };
+            
+            if (presets[league]) {
+                state.teams = [...new Set([...state.teams, ...presets[league]])]; // Merge without duplicates
+                updateUI();
+                saveToLocalStorage();
+                showNotification(`Loaded ${presets[league].length} ${league} teams`, 'success');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white ${
+                type === 'error' ? 'bg-red-500' : 
+                type === 'success' ? 'bg-green-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Add event delegation for dynamically created edit buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-fixture') || e.target.closest('.edit-fixture')) {
+                const button = e.target.classList.contains('edit-fixture') ? e.target : e.target.closest('.edit-fixture');
+                const fixtureId = button.dataset.id;
+                editFixture(fixtureId);
+            }
+        });
+    </script>
+</body>
+</html>

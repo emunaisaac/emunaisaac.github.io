@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Traffic Light System Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #ecf0f1;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .control-panel {
+            background: rgba(52, 73, 94, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            background: rgba(44, 62, 80, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .control-group h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        select, input {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .intersection {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 0 auto;
+            background: #2c3e50;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .road {
+            position: absolute;
+            background: #7f8c8d;
+        }
+
+        .road-horizontal {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            transform: translateY(-50%);
+            border-top: 3px dashed #ecf0f1;
+            border-bottom: 3px dashed #ecf0f1;
+        }
+
+        .road-vertical {
+            left: 50%;
+            top: 0;
+            height: 100%;
+            width: 60px;
+            transform: translateX(-50%);
+            border-left: 3px dashed #ecf0f1;
+            border-right: 3px dashed #ecf0f1;
+        }
+
+        .lane {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .lane-north {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lane-south {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lane-east {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .lane-west {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .traffic-light {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #2c3e50;
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px solid #34495e;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .light {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 5px;
+            background: #3a3a3a;
+            border: 2px solid #2c2c2c;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .light.red.active {
+            background: #e74c3c;
+            box-shadow: 0 0 20px #e74c3c;
+        }
+
+        .light.yellow.active {
+            background: #f39c12;
+            box-shadow: 0 0 20px #f39c12;
+        }
+
+        .light.green.active {
+            background: #2ecc71;
+            box-shadow: 0 0 20px #2ecc71;
+        }
+
+        .pedestrian-light {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .ped-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            border: 1px solid #2c2c2c;
+        }
+
+        .ped-light.walk.active {
+            background: #2ecc71;
+        }
+
+        .ped-light.dont-walk.active {
+            background: #e74c3c;
+        }
+
+        .countdown {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .vehicle {
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .emergency-banner {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .timing-display {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .timing-item {
+            text-align: center;
+        }
+
+        .log-container {
+            margin-top: 30px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #3498db;
+            background: rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .intersection {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .light {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚦 Advanced Traffic Light System Simulation</h1>
+            <div class="status-bar" id="status">
+                System Status: <span style="color: #2ecc71">READY</span> | 
+                Phase: <span id="current-phase">Auto Cycle</span> | 
+                Time: <span id="system-time">00:00</span>
+            </div>
+        </header>
+
+        <div class="control-panel">
+            <div class="control-grid">
+                <div class="control-group">
+                    <h3>System Control</h3>
+                    <button onclick="startSystem()">▶️ Start System</button>
+                    <button onclick="stopSystem()">⏹️ Stop System</button>
+                    <button onclick="resetSystem()">🔄 Reset</button>
+                    <button onclick="emergencyOverride()">🚨 Emergency Override</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>Admin Override</h3>
+                    <select id="priorityLane">
+                        <option value="">Select Priority Lane</option>
+                        <option value="north">North Bound</option>
+                        <option value="south">South Bound</option>
+                        <option value="east">East Bound</option>
+                        <option value="west">West Bound</option>
+                    </select>
+                    <button onclick="adminOverride()">✅ Apply Override</button>
+                    <div id="emergency-status" class="emergency-banner">EMERGENCY MODE ACTIVE</div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Timing Configuration</h3>
+                    <label>Green Light (seconds):</label>
+                    <input type="number" id="green-time" value="20" min="5" max="60">
+                    <label>Yellow Light (seconds):</label>
+                    <input type="number" id="yellow-time" value="5" min="2" max="10">
+                    <label>Red Light (seconds):</label>
+                    <input type="number" id="red-time" value="3" min="1" max="10">
+                    <button onclick="updateTimings()">⚙️ Update Timings</button>
+                </div>
+            </div>
+
+            <div class="timing-display">
+                <div class="timing-item">
+                    <span>Green: </span><span id="display-green">20s</span>
+                </div>
+                <div class="timing-item">
+                    <span>Yellow: </span><span id="display-yellow">5s</span>
+                </div>
+                <div class="timing-item">
+                    <span>Red: </span><span id="display-red">3s</span>
+                </div>
+                <div class="timing-item">
+                    <span>Override: </span><span id="display-override">10s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="intersection">
+            <div class="road road-horizontal"></div>
+            <div class="road road-vertical"></div>
+            
+            <div class="lane lane-north">
+                <h4>NORTH</h4>
+                <div class="traffic-light">
+                    <div class="light red" id="north-red"></div>
+                    <div class="light yellow" id="north-yellow"></div>
+                    <div class="light green" id="north-green"></div>
+                </div>
+                <div class="pedestrian-light">
+                    <div class="ped-light walk" id="north-walk"></div>
+                    <div class="ped-light dont-walk" id="north-dont"></div>
+                </div>
+                <div class="countdown" id="north-countdown">20</div>
+            </div>
+
+            <div class="lane lane-south">
+                <h4>SOUTH</h4>
+                <div class="traffic-light">
+                    <div class="light red" id="south-red"></div>
+                    <div class="light yellow" id="south-yellow"></div>
+                    <div class="light green" id="south-green"></div>
+                </div>
+                <div class="pedestrian-light">
+                    <div class="ped-light walk" id="south-walk"></div>
+                    <div class="ped-light dont-walk" id="south-dont"></div>
+                </div>
+                <div class="countdown" id="south-countdown">20</div>
+            </div>
+
+            <div class="lane lane-east">
+                <h4>EAST</h4>
+                <div class="traffic-light">
+                    <div class="light red" id="east-red"></div>
+                    <div class="light yellow" id="east-yellow"></div>
+                    <div class="light green" id="east-green"></div>
+                </div>
+                <div class="pedestrian-light">
+                    <div class="ped-light walk" id="east-walk"></div>
+                    <div class="ped-light dont-walk" id="east-dont"></div>
+                </div>
+                <div class="countdown" id="east-countdown">20</div>
+            </div>
+
+            <div class="lane lane-west">
+                <h4>WEST</h4>
+                <div class="traffic-light">
+                    <div class="light red" id="west-red"></div>
+                    <div class="light yellow" id="west-yellow"></div>
+                    <div class="light green" id="west-green"></div>
+                </div>
+                <div class="pedestrian-light">
+                    <div class="ped-light walk" id="west-walk"></div>
+                    <div class="ped-light dont-walk" id="west-dont"></div>
+                </div>
+                <div class="countdown" id="west-countdown">20</div>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <h3>System Log</h3>
+            <div id="system-log">
+                <div class="log-entry">System initialized and ready</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System variables
+        let systemInterval;
+        let cycleInterval;
+        let currentPhase = 'north-south';
+        let systemRunning = false;
+        let emergencyMode = false;
+        let systemStartTime = Date.now();
+        
+        // Timing configurations
+        let timings = {
+            green: 20,
+            yellow: 5,
+            red: 3,
+            pedestrian: 10,
+            override: 10
+        };
+
+        // Sound effects (using Web Audio API)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(frequency, duration, type = 'sine') {
+            if (systemRunning) {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                oscillator.stop(audioContext.currentTime + duration);
+            }
+        }
+
+        function logEvent(message) {
+            const log = document.getElementById('system-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateSystemTime() {
+            const elapsed = Math.floor((Date.now() - systemStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('system-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimings() {
+            timings.green = parseInt(document.getElementById('green-time').value) || 20;
+            timings.yellow = parseInt(document.getElementById('yellow-time').value) || 5;
+            timings.red = parseInt(document.getElementById('red-time').value) || 3;
+            
+            document.getElementById('display-green').textContent = timings.green + 's';
+            document.getElementById('display-yellow').textContent = timings.yellow + 's';
+            document.getElementById('display-red').textContent = timings.red + 's';
+            
+            logEvent(`Timings updated: Green=${timings.green}s, Yellow=${timings.yellow}s, Red=${timings.red}s`);
+        }
+
+        function startSystem() {
+            if (!systemRunning) {
+                systemRunning = true;
+                systemStartTime = Date.now();
+                systemInterval = setInterval(updateSystemTime, 1000);
+                document.getElementById('status').innerHTML = 
+                    'System Status: <span style="color: #2ecc71">RUNNING</span> | ' +
+                    'Phase: <span id="current-phase">Auto Cycle</span> | ' +
+                    'Time: <span id="system-time">00:00</span>';
+                
+                cycleLights();
+                logEvent('System started - Auto mode activated');
+                playSound(440, 0.1);
+            }
+        }
+
+        function stopSystem() {
+            clearInterval(systemInterval);
+            clearTimeout(cycleInterval);
+            systemRunning = false;
+            emergencyMode = false;
+            document.getElementById('emergency-status').style.display = 'none';
+            document.getElementById('status').innerHTML = 
+                'System Status: <span style="color: #e74c3c">STOPPED</span> | ' +
+                'Phase: <span id="current-phase">Manual</span> | ' +
+                'Time: <span id="system-time">--:--</span>';
+            logEvent('System stopped');
+            playSound(220, 0.2);
+        }
+
+        function resetSystem() {
+            stopSystem();
+            resetAllLights();
+            document.getElementById('priorityLane').value = '';
+            document.getElementById('system-log').innerHTML = '<div class="log-entry">System reset and ready</div>';
+            logEvent('System reset completed');
+        }
+
+        function resetAllLights() {
+            const lanes = ['north', 'south', 'east', 'west'];
+            lanes.forEach(lane => {
+                document.getElementById(`${lane}-red`).classList.remove('active');
+                document.getElementById(`${lane}-yellow`).classList.remove('active');
+                document.getElementById(`${lane}-green`).classList.remove('active');
+                document.getElementById(`${lane}-walk`).classList.remove('active');
+                document.getElementById(`${lane}-dont`).classList.remove('active');
+                document.getElementById(`${lane}-countdown`).textContent = '--';
+            });
+        }
+
+        function cycleLights() {
+            if (!systemRunning) return;
+
+            clearTimeout(cycleInterval);
+            
+            switch (currentPhase) {
+                case 'north-south':
+                    activateLanePair('north', 'south');
+                    currentPhase = 'transition-ns';
+                    cycleInterval = setTimeout(() => cycleLights(), timings.green * 1000);
+                    break;
+                
+                case 'transition-ns':
+                    transitionLanePair('north', 'south');
+                    currentPhase = 'east-west';
+                    cycleInterval = setTimeout(() => cycleLights(), timings.yellow * 1000);
+                    break;
+                
+                case 'east-west':
+                    activateLanePair('east', 'west');
+                    currentPhase = 'transition-ew';
+                    cycleInterval = setTimeout(() => cycleLights(), timings.green * 1000);
+                    break;
+                
+                case 'transition-ew':
+                    transitionLanePair('east', 'west');
+                    currentPhase = 'north-south';
+                    cycleInterval = setTimeout(() => cycleLights(), timings.yellow * 1000);
+                    break;
+            }
+        }
+
+        function activateLanePair(lane1, lane2) {
+            resetAllLights();
+            
+            // Activate green for main lanes
+            document.getElementById(`${lane1}-green`).classList.add('active');
+            document.getElementById(`${lane2}-green`).classList.add('active');
+            
+            // Activate red for perpendicular lanes
+            const perpendicularLanes = ['north', 'south', 'east', 'west'].filter(l => l !== lane1 && l !== lane2);
+            perpendicularLanes.forEach(lane => {
+                document.getElementById(`${lane}-red`).classList.add('active');
+            });
+            
+            // Update pedestrian lights
+            document.getElementById(`${lane1}-walk`).classList.add('active');
+            document.getElementById(`${lane2}-walk`).classList.add('active');
+            perpendicularLanes.forEach(lane => {
+                document.getElementById(`${lane}-dont`).classList.add('active');
+            });
+            
+            // Start countdowns
+            startCountdown(lane1, timings.green);
+            startCountdown(lane2, timings.green);
+            perpendicularLanes.forEach(lane => {
+                startCountdown(lane, timings.green + timings.yellow);
+            });
+            
+            document.getElementById('current-phase').textContent = `${lane1.toUpperCase()}-${lane2.toUpperCase()} Green`;
+            logEvent(`${lane1.toUpperCase()}-${lane2.toUpperCase()} direction: Green light activated`);
+            playSound(523.25, 0.1); // C5 note
+        }
+
+        function transitionLanePair(lane1, lane2) {
+            // Switch to yellow for main lanes
+            document.getElementById(`${lane1}-green`).classList.remove('active');
+            document.getElementById(`${lane2}-green`).classList.remove('active');
+            document.getElementById(`${lane1}-yellow`).classList.add('active');
+            document.getElementById(`${lane2}-yellow`).classList.add('active');
+            
+            // Update pedestrian lights to don't walk
+            document.getElementById(`${lane1}-walk`).classList.remove('active');
+            document.getElementById(`${lane2}-walk`).classList.remove('active');
+            document.getElementById(`${lane1}-dont`).classList.add('active');
+            document.getElementById(`${lane2}-dont`).classList.add('active');
+            
+            // Update countdowns
+            startCountdown(lane1, timings.yellow);
+            startCountdown(lane2, timings.yellow);
+            
+            document.getElementById('current-phase').textContent = `${lane1.toUpperCase()}-${lane2.toUpperCase()} Yellow`;
+            logEvent(`${lane1.toUpperCase()}-${lane2.toUpperCase()} direction: Yellow caution`);
+            playSound(392, 0.2); // G4 note
+        }
+
+        function startCountdown(lane, duration) {
+            let countdown = duration;
+            const countdownElement = document.getElementById(`${lane}-countdown`);
+            countdownElement.textContent = countdown;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown > 0 ? countdown : '--';
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+                
+                // Blink pedestrian light when countdown is low
+                if (countdown <= 3 && document.getElementById(`${lane}-walk`).classList.contains('active')) {
+                    document.getElementById(`${lane}-walk`).style.opacity = 
+                        (countdown % 2 === 0) ? '1' : '0.3';
+                }
+            }, 1000);
+        }
+
+        function adminOverride() {
+            if (!systemRunning) {
+                alert('Please start the system first!');
+                return;
+            }
+            
+            const selectedLane = document.getElementById('priorityLane').value;
+            if (!selectedLane) {
+                alert('Please select a lane for override!');
+                return;
+            }
+            
+            clearTimeout(cycleInterval);
+            emergencyMode = true;
+            
+            resetAllLights();
+            
+            // Activate selected lane
+            document.getElementById(`${selectedLane}-green`).classList.add('active');
+            
+            // All other lanes get red
+            ['north', 'south', 'east', 'west']
+                .filter(lane => lane !== selectedLane)
+                .forEach(lane => {
+                    document.getElementById(`${lane}-red`).classList.add('active');
+                });
+            
+            // Start countdown for override
+            startCountdown(selectedLane, timings.override);
+            
+            document.getElementById('emergency-status').style.display = 'block';
+            document.getElementById('current-phase').textContent = `Override: ${selectedLane.toUpperCase()}`;
+            logEvent(`ADMIN OVERRIDE: Priority given to ${selectedLane.toUpperCase()} bound traffic`);
+            playSound(659.25, 0.3); // E5 note
+            
+            // Return to auto cycle after override
+            setTimeout(() => {
+                emergencyMode = false;
+                document.getElementById('emergency-status').style.display = 'none';
+                document.getElementById('priorityLane').value = '';
+                if (systemRunning) {
+                    cycleLights();
+                    logEvent('Returning to automatic cycle mode');
+                    playSound(523.25, 0.1);
+                }
+            }, timings.override * 1000);
+        }
+
+        function emergencyOverride() {
+            if (!systemRunning) {
+                alert('Please start the system first!');
+                return;
+            }
+            
+            // Flash all lights red for emergency
+            resetAllLights();
+            emergencyMode = true;
+            
+            const flashInterval = setInterval(() => {
+                const allRedLights = document.querySelectorAll('.light.red');
+                allRedLights.forEach(light => {
+                    light.classList.toggle('active');
+                });
+            }, 500);
+            
+            document.getElementById('emergency-status').style.display = 'block';
+            document.getElementById('current-phase').textContent = 'EMERGENCY MODE';
+            logEvent('EMERGENCY OVERRIDE ACTIVATED - All traffic stopped');
+            playSound(783.99, 0.5); // G5 note
+            
+            // Return to normal after 10 seconds
+            setTimeout(() => {
+                clearInterval(flashInterval);
+                emergencyMode = false;
+                document.getElementById('emergency-status').style.display = 'none';
+                if (systemRunning) {
+                    cycleLights();
+                    logEvent('Emergency cleared - Returning to normal operation');
+                    playSound(523.25, 0.1);
+                }
+            }, 10000);
+        }
+
+        // Initialize the system
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTimings();
+            resetAllLights();
+            logEvent('System initialized successfully');
+        });
+    </script>
+</body>
+</html>
+

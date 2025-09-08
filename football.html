@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Football Match Ticketing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #dc2626;
+            --accent: #059669;
+            --dark: #1f2937;
+            --light: #f8fafc;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .ticket-card {
+            background: linear-gradient(145deg, #ffffff, #f1f5f9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .match-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .match-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .match-card.selected {
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .match-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--secondary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .seat-map {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .seat {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .seat.available {
+            background: #10b981;
+            color: white;
+        }
+        
+        .seat.occupied {
+            background: #ef4444;
+            color: white;
+            cursor: not-allowed;
+        }
+        
+        .seat.selected {
+            background: #3b82f6;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .seat.vip {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .payment-card {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-card.selected {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .animated-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .ticket-design {
+            background: linear-gradient(45deg, #1e40af, #3b82f6);
+            color: white;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ticket-design::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                white 10px,
+                white 20px
+            );
+        }
+        
+        .stadium-view {
+            height: 200px;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), 
+                       url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect width="400" height="200" fill="%231e40af"/><circle cx="200" cy="100" r="60" fill="%233b82f6" opacity="0.3"/><rect x="180" y="40" width="40" height="120" fill="%23ffffff" opacity="0.2"/></svg>');
+            background-size: cover;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .success-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .success-toast.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Loading Overlay -->
+    <div class="loading" id="loadingOverlay">
+        <div class="bg-white p-6 rounded-xl text-center">
+            <div class="animated-spinner inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div>
+            <p class="text-gray-700 font-semibold">Processing your payment...</p>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="success-toast" id="successToast">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-xl mr-2"></i>
+            <span>Payment successful! Ticket generated.</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="https://placehold.co/40x40" alt="Football ticketing system logo with stadium icon and ticket design" class="h-8 w-8 rounded-lg">
+                    <span class="text-xl font-bold">FootTicket Pro</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="adminToggle" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50">
+                        <i class="fas fa-user-cog mr-2"></i>Admin Panel
+                    </button>
+                    <button class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600">12</div>
+                <div class="text-gray-600">Upcoming Matches</div>
+                <div class="mt-3 text-blue-500">
+                    <i class="fas fa-futbol text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6 text-center">
+                <div class="text-3xl font-bold text-green-600">4,238</div>
+                <div class="text-gray-600">Tickets Sold</div>
+                <div class="mt-3 text-green-500">
+                    <i class="fas fa-ticket-alt text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6 text-center">
+                <div class="text-3xl font-bold text-yellow-600">86%</div>
+                <div class="text-gray-600">Stadium Capacity</div>
+                <div class="mt-3 text-yellow-500">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6 text-center">
+                <div class="text-3xl font-bold text-purple-600">$42,380</div>
+                <div class="text-gray-600">Total Revenue</div>
+                <div class="mt-3 text-purple-500">
+                    <i class="fas fa-dollar-sign text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Match Selection -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Match & Tickets</h2>
+                    
+                    <!-- Match Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" id="matchCards">
+                        <div class="match-card bg-blue-50 p-4 rounded-xl border-2 border-blue-200" data-match="man-united-liverpool">
+                            <div class="match-badge">Selling Fast</div>
+                            <div class="text-center mb-4">
+                                <div class="text-lg font-bold">Premier League</div>
+                                <div class="text-sm text-gray-600">Saturday, Dec 15 • 15:00</div>
+                            </div>
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-center">
+                                    <img src="https://placehold.co/60x60" alt="Manchester United FC logo with red devil emblem" class="mx-auto h-12 w-12 mb-2">
+                                    <div class="font-semibold">Man United</div>
+                                </div>
+                                <div class="text-xl font-bold text-gray-700">VS</div>
+                                <div class="text-center">
+                                    <img src="https://placehold.co/60x60" alt="Liverpool FC logo with liver bird emblem" class="mx-auto h-12 w-12 mb-2">
+                                    <div class="font-semibold">Liverpool</div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600">Old Trafford Stadium</div>
+                                <div class="mt-2 text-green-600 font-semibold">From $45</div>
+                            </div>
+                        </div>
+
+                        <div class="match-card bg-red-50 p-4 rounded-xl border-2 border-red-200" data-match="barcelona-bayern">
+                            <div class="match-badge">New</div>
+                            <div class="text-center mb-4">
+                                <div class="text-lg font-bold">Champions League</div>
+                                <div class="text-sm text-gray-600">Tuesday, Dec 19 • 20:00</div>
+                            </div>
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-center">
+                                    <img src="https://placehold.co/60x60" alt="FC Barcelona crest with blaugrana colors" class="mx-auto h-12 w-12 mb-2">
+                                    <div class="font-semibold">Barcelona</div>
+                                </div>
+                                <div class="text-xl font-bold text-gray-700">VS</div>
+                                <div class="text-center">
+                                    <img src="https://placehold.co/60x60" alt="Bayern Munich FC logo with red and blue pattern" class="mx-auto h-12 w-12 mb-2">
+                                    <div class="font-semibold">Bayern Munich</div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600">Camp Nou</div>
+                                <div class="mt-2 text-green-600 font-semibold">From $65</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Details Form -->
+                    <div class="bg-gray-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-semibold mb-4">Ticket Details</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ticket Category</label>
+                                <select id="ticketCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="45">General Admission - $45</option>
+                                    <option value="75">Premium Seating - $75</option>
+                                    <option value="150">VIP Box - $150</option>
+                                    <option value="120">Family Package - $120</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                <div class="flex items-center">
+                                    <button id="decreaseQty" class="bg-gray-200 px-4 py-3 rounded-l-lg hover:bg-gray-300">-</button>
+                                    <input type="number" id="quantity" value="1" min="1" max="10" class="w-16 text-center border-t border-b border-gray-300 py-3">
+                                    <button id="increaseQty" class="bg-gray-200 px-4 py-3 rounded-r-lg hover:bg-gray-300">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seat Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Select Seats</label>
+                            <div class="stadium-view mb-4 rounded-lg"></div>
+                            <div class="seat-map" id="seatMap">
+                                <!-- Seats will be generated dynamically -->
+                            </div>
+                            <div class="flex justify-between mt-4">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-green-500 mr-2 rounded"></div>
+                                    <span class="text-sm">Available</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-blue-500 mr-2 rounded"></div>
+                                    <span class="text-sm">Selected</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-red-500 mr-2 rounded"></div>
+                                    <span class="text-sm">Occupied</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-yellow-500 mr-2 rounded"></div>
+                                    <span class="text-sm">VIP</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <h3 class="text-xl font-semibold mb-4">Personal Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input type="text" id="fullName" placeholder="Enter your full name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" id="email" placeholder="your.email@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                <input type="tel" id="phone" placeholder="+1 (555) 123-4567" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ID Number</label>
+                                <input type="text" id="idNumber" placeholder="Government issued ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                        </div>
+
+                        <!-- Price Summary -->
+                        <div class="bg-blue-50 p-4 rounded-xl mb-6" id="priceSummary">
+                            <h4 class="font-semibold text-lg mb-3">Price Summary</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span id="ticketDescription">1 x General Admission</span>
+                                    <span id="subtotal">$45.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Service Fee</span>
+                                    <span id="serviceFee">$4.50</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Processing Fee</span>
+                                    <span id="processingFee">$2.50</span>
+                                </div>
+                                <div class="flex justify-between border-t border-gray-300 pt-2 mt-2">
+                                    <span class="font-bold">Total</span>
+                                    <span class="font-bold text-blue-600" id="totalPrice">$52.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="proceedToPayment" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-shopping-cart mr-2"></i>Proceed to Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment & Tickets Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Payment Methods -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Payment Methods</h2>
+                    
+                    <div class="space-y-4" id="paymentMethods">
+                        <div class="payment-card bg-gray-50 p-4 rounded-lg" data-method="mtn">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-mobile-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">MTN Mobile Money</div>
+                                    <div class="text-sm text-gray-600">Pay via MTN Uganda</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-card bg-gray-50 p-4 rounded-lg" data-method="airtel">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-mobile-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">Airtel Money</div>
+                                    <div class="text-sm text-gray-600">Pay via Airtel Uganda</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-card bg-gray-50 p-4 rounded-lg" data-method="card">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-credit-card text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">Credit/Debit Card</div>
+                                    <div class="text-sm text-gray-600">Visa, MasterCard, American Express</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-card bg-gray-50 p-4 rounded-lg" data-method="easypay">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-wallet text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">EasyPay Wallet</div>
+                                    <div class="text-sm text-gray-600">Quick and secure payments</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="mt-6 p-4 bg-yellow-50 rounded-lg" id="paymentInstructions">
+                        <h4 class="font-semibold mb-2">Payment Instructions</h4>
+                        <p class="text-sm text-gray-600 mb-3">Send payment to: <strong>0784176181</strong></p>
+                        <p class="text-sm text-gray-600">Reference: <strong id="paymentReference">FT-123456</strong></p>
+                        <div class="mt-3 bg-white p-3 rounded">
+                            <button id="processPayment" class="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700">
+                                Confirm Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Tickets -->
+                <div class="bg-white rounded-xl shadow-lg p-6" id="ticketsContainer">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Your Tickets</h2>
+                    <div id="ticketsList" class="space-y-4">
+                        <!-- Tickets will be loaded here -->
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button id="viewAllTickets" class="text-blue-600 text-sm hover:underline">View All Tickets</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Configuration Section (Hidden by default) -->
+        <div id="apiConfig" class="hidden bg-gray-100 p-6 rounded-xl mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">API Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">MTN Mobile Money API</label>
+                    <input type="text" placeholder="https://api.mtn.com/v1/payments" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Airtel Money API</label>
+                    <input type="text" placeholder="https://api.airtel.com/payment" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">EasyPay API</label>
+                    <input type="text" placeholder="https://api.easypay.com/process" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                    <input type="password" placeholder="Your API key" class="w-full px-4 py-2 border rounded">
+                </div>
+            </div>
+            <div class="mt-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all components
+            initMatchSelection();
+            initSeatMap();
+            initPaymentMethods();
+            initQuantityControls();
+            initPriceCalculation();
+            initPaymentProcess();
+            loadSavedTickets();
+            
+            // Generate initial price calculation
+            calculatePrice();
+        });
+
+        function initMatchSelection() {
+            const matchCards = document.querySelectorAll('.match-card');
+            matchCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    matchCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    // Update payment reference with match info
+                    updatePaymentReference();
+                });
+            });
+        }
+
+        function initSeatMap() {
+            const seatMap = document.getElementById('seatMap');
+            const rows = ['A', 'B', 'C', 'D', 'E'];
+            
+            rows.forEach(row => {
+                for (let i = 1; i <= 10; i++) {
+                    const seat = document.createElement('div');
+                    seat.className = 'seat available';
+                    seat.textContent = row + i;
+                    seat.dataset.seat = row + i;
+                    
+                    // Randomly assign some seats as occupied or VIP
+                    if (Math.random() > 0.7) {
+                        seat.className = 'seat occupied';
+                    } else if (Math.random() > 0.5 && i > 3 && i < 8) {
+                        seat.className = 'seat vip';
+                    }
+                    
+                    seat.addEventListener('click', function() {
+                        if (this.classList.contains('available') || this.classList.contains('vip')) {
+                            this.classList.toggle('selected');
+                            updateSelectedSeats();
+                        }
+                    });
+                    
+                    seatMap.appendChild(seat);
+                }
+            });
+        }
+
+        function initPaymentMethods() {
+            const paymentCards = document.querySelectorAll('.payment-card');
+            paymentCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    paymentCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    updatePaymentInstructions(card.dataset.method);
+                });
+            });
+        }
+
+        function initQuantityControls() {
+            const quantityInput = document.getElementById('quantity');
+            const decreaseBtn = document.getElementById('decreaseQty');
+            const increaseBtn = document.getElementById('increaseQty');
+            
+            decreaseBtn.addEventListener('click', () => {
+                if (quantityInput.value > 1) {
+                    quantityInput.value--;
+                    calculatePrice();
+                }
+            });
+            
+            increaseBtn.addEventListener('click', () => {
+                if (quantityInput.value < 10) {
+                    quantityInput.value++;
+                    calculatePrice();
+                }
+            });
+            
+            quantityInput.addEventListener('change', calculatePrice);
+        }
+
+        function initPriceCalculation() {
+            const ticketCategory = document.getElementById('ticketCategory');
+            ticketCategory.addEventListener('change', calculatePrice);
+        }
+
+        function initPaymentProcess() {
+            const proceedBtn = document.getElementById('proceedToPayment');
+            const processBtn = document.getElementById('processPayment');
+            
+            proceedBtn.addEventListener('click', () => {
+                // Validate form
+                if (validateForm()) {
+                    // Scroll to payment section
+                    document.getElementById('paymentInstructions').scrollIntoView({ behavior: 'smooth' });
+                    updatePaymentReference();
+                }
+            });
+            
+            processBtn.addEventListener('click', processPayment);
+        }
+
+        function calculatePrice() {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const ticketPrice = parseInt(document.getElementById('ticketCategory').value);
+            const categoryText = document.getElementById('ticketCategory').options[document.getElementById('ticketCategory').selectedIndex].text.split(' - ')[0];
+            
+            const subtotal = ticketPrice * quantity;
+            const serviceFee = subtotal * 0.1; // 10% service fee
+            const processingFee = 2.50; // Fixed processing fee
+            const total = subtotal + serviceFee + processingFee;
+            
+            // Update UI
+            document.getElementById('ticketDescription').textContent = `${quantity} x ${categoryText}`;
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('serviceFee').textContent = `$${serviceFee.toFixed(2)}`;
+            document.getElementById('processingFee').textContent = `$${processingFee.toFixed(2)}`;
+            document.getElementById('totalPrice').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function updateSelectedSeats() {
+            const selectedSeats = Array.from(document.querySelectorAll('.seat.selected'))
+                .map(seat => seat.dataset.seat)
+                .join(', ');
+            
+            // You could display selected seats in the UI if needed
+            console.log('Selected seats:', selectedSeats);
+        }
+
+        function updatePaymentReference() {
+            const selectedMatch = document.querySelector('.match-card.selected');
+            const matchName = selectedMatch ? selectedMatch.querySelector('.text-lg').textContent : 'MATCH';
+            const reference = `FT-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+            document.getElementById('paymentReference').textContent = reference;
+        }
+
+        function updatePaymentInstructions(method) {
+            const instructions = document.getElementById('paymentInstructions');
+            let html = '';
+            
+            switch(method) {
+                case 'mtn':
+                    html = `
+                        <h4 class="font-semibold mb-2">MTN Mobile Money Instructions</h4>
+                        <p class="text-sm text-gray-600 mb-2">1. Dial *165#</p>
+                        <p class="text-sm text-gray-600 mb-2">2. Select "Send Money"</p>
+                        <p class="text-sm text-gray-600 mb-2">3. Enter number: <strong>0784176181</strong></p>
+                        <p class="text-sm text-gray-600 mb-3">4. Reference: <strong id="paymentReference">${document.getElementById('paymentReference').textContent}</strong></p>
+                    `;
+                    break;
+                case 'airtel':
+                    html = `
+                        <h4 class="font-semibold mb-2">Airtel Money Instructions</h4>
+                        <p class="text-sm text-gray-600 mb-2">1. Dial *185#</p>
+                        <p class="text-sm text-gray-600 mb-2">2. Select "Send Money"</p>
+                        <p class="text-sm text-gray-600 mb-2">3. Enter number: <strong>0784176181</strong></p>
+                        <p class="text-sm text-gray-600 mb-3">4. Reference: <strong id="paymentReference">${document.getElementById('paymentReference').textContent}</strong></p>
+                    `;
+                    break;
+                case 'card':
+                    html = `
+                        <h4 class="font-semibold mb-2">Card Payment</h4>
+                        <p class="text-sm text-gray-600 mb-3">You will be redirected to our secure payment gateway</p>
+                    `;
+                    break;
+                case 'easypay':
+                    html = `
+                        <h4 class="font-semibold mb-2">EasyPay Instructions</h4>
+                        <p class="text-sm text-gray-600 mb-2">1. Login to your EasyPay wallet</p>
+                        <p class="text-sm text-gray-600 mb-2">2. Select "Pay Bill"</p>
+                        <p class="text-sm text-gray-600 mb-3">3. Use reference: <strong id="paymentReference">${document.getElementById('paymentReference').textContent}</strong></p>
+                    `;
+                    break;
+            }
+            
+            instructions.innerHTML = html + `
+                <div class="mt-3 bg-white p-3 rounded">
+                    <button id="processPayment" class="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700">
+                        Confirm Payment
+                    </button>
+                </div>
+            `;
+            
+            // Re-attach event listener
+            document.getElementById('processPayment').addEventListener('click', processPayment);
+        }
+
+        function validateForm() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!fullName || !email || !phone) {
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            if (!document.querySelector('.match-card.selected')) {
+                alert('Please select a match');
+                return false;
+            }
+            
+            if (!document.querySelector('.payment-card.selected')) {
+                alert('Please select a payment method');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function processPayment() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const successToast = document.getElementById('successToast');
+            const selectedMethod = document.querySelector('.payment-card.selected').dataset.method;
+            
+            // Show loading
+            loadingOverlay.classList.add('active');
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                loadingOverlay.classList.remove('active');
+                successToast.classList.add('active');
+                
+                // Generate ticket
+                generateTicket();
+                
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    successToast.classList.remove('active');
+                }, 3000);
+            }, 2000);
+            
+            // In a real implementation, you would make API calls here:
+            /*
+            const paymentData = {
+                method: selectedMethod,
+                amount: parseFloat(document.getElementById('totalPrice').textContent.replace('$', '')),
+                reference: document.getElementById('paymentReference').textContent,
+                phone: document.getElementById('phone').value,
+                // Add other necessary data
+            };
+            
+            // Example API call structure:
+            fetch('/api/payment/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(paymentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    generateTicket();
+                } else {
+                    alert('Payment failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Payment processing error');
+            });
+            */
+        }
+
+        function generateTicket() {
+            const ticketId = 'TICKET-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+            const selectedMatch = document.querySelector('.match-card.selected');
+            const matchName = selectedMatch ? selectedMatch.querySelector('.text-lg').textContent : 'Football Match';
+            const matchDate = selectedMatch ? selectedMatch.querySelector('.text-sm').textContent : 'Date TBD';
+            const teams = selectedMatch ? selectedMatch.querySelectorAll('.font-semibold') : [];
+            const team1 = teams[0] ? teams[0].textContent : 'Team A';
+            const team2 = teams[1] ? teams[1].textContent : 'Team B';
+            
+            const ticketData = {
+                id: ticketId,
+                match: `${team1} vs ${team2}`,
+                date: matchDate,
+                category: document.getElementById('ticketCategory').options[document.getElementById('ticketCategory').selectedIndex].text.split(' - ')[0],
+                quantity: document.getElementById('quantity').value,
+                price: document.getElementById('totalPrice').textContent,
+                customer: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                purchaseDate: new Date().toLocaleDateString(),
+                status: 'Active'
+            };
+            
+            // Save ticket
+            saveTicket(ticketData);
+            
+            // Update UI
+            loadSavedTickets();
+        }
+
+        function saveTicket(ticketData) {
+            let tickets = JSON.parse(localStorage.getItem('footballTickets') || '[]');
+            tickets.push(ticketData);
+            localStorage.setItem('footballTickets', JSON.stringify(tickets));
+        }
+
+        function loadSavedTickets() {
+            const ticketsList = document.getElementById('ticketsList');
+            const tickets = JSON.parse(localStorage.getItem('footballTickets') || '[]');
+            
+            ticketsList.innerHTML = '';
+            
+            if (tickets.length === 0) {
+                ticketsList.innerHTML = '<p class="text-gray-500 text-center py-4">No tickets purchased yet</p>';
+                return;
+            }
+            
+            // Show latest 2 tickets
+            const recentTickets = tickets.slice(-2).reverse();
+            
+            recentTickets.forEach(ticket => {
+                const ticketEl = document.createElement('div');
+                ticketEl.className = 'ticket-design p-4';
+                ticketEl.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="font-bold">${ticket.id}</div>
+                            <div class="text-sm opacity-90">${ticket.match}</div>
+                        </div>
+                        <div class="bg-white text-blue-600 px-2 py-1 rounded text-xs font-bold">${ticket.status}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                        <div>Category: <strong>${ticket.category}</strong></div>
+                        <div>Qty: <strong>${ticket.quantity}</strong></div>
+                        <div>Date: <strong>${ticket.date.split('•')[0]}</strong></div>
+                        <div>Price: <strong>${ticket.price}</strong></div>
+                    </div>
+                    <div class="flex justify-between">
+                        <button class="view-ticket text-white text-sm hover:underline" data-id="${ticket.id}">View</button>
+                        <button class="download-ticket text-white text-sm hover:underline" data-id="${ticket.id}">Download</button>
+                    </div>
+                `;
+                
+                ticketsList.appendChild(ticketEl);
+            });
+            
+            // Add event listeners to new buttons
+            document.querySelectorAll('.view-ticket').forEach(btn => {
+                btn.addEventListener('click', () => viewTicket(btn.dataset.id));
+            });
+            
+            document.querySelectorAll('.download-ticket').forEach(btn => {
+                btn.addEventListener('click', () => downloadTicket(btn.dataset.id));
+            });
+        }
+
+        function viewTicket(ticketId) {
+            const tickets = JSON.parse(localStorage.getItem('footballTickets') || '[]');
+            const ticket = tickets.find(t => t.id === ticketId);
+            
+            if (ticket) {
+                alert(`Ticket Details:\nID: ${ticket.id}\nMatch: ${ticket.match}\nCustomer: ${ticket.customer}\nPrice: ${ticket.price}`);
+            }
+        }
+
+        function downloadTicket(ticketId) {
+            // Implement ticket download functionality
+            alert(`Downloading ticket: ${ticketId}`);
+            // This would use html2canvas and jsPDF to generate a downloadable ticket
+        }
+
+        // View all tickets functionality
+        document.getElementById('viewAllTickets').addEventListener('click', () => {
+            const tickets = JSON.parse(localStorage.getItem('footballTickets') || '[]');
+            if (tickets.length > 0) {
+                alert(`You have ${tickets.length} tickets in total.\n\n${tickets.map(t => `${t.id}: ${t.match} (${t.date})`).join('\n')}`);
+            } else {
+                alert('No tickets found');
+            }
+        });
+
+        // Admin panel toggle
+        document.getElementById('adminToggle').addEventListener('click', () => {
+            const apiConfig = document.getElementById('apiConfig');
+            apiConfig.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

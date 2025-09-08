@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eitnerds - Empowering Your Online Presence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-blue: #1a56db;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --accent-red: #dc2626;
+            --dark-gray: #1f2937;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --black: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--white);
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        h1, h2, h3, h4 {
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: var(--primary-blue);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-red);
+        }
+
+        .btn-secondary:hover {
+            background: #b91c1c;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent-red);
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-blue);
+            transition: width 0.3s ease;
+        }
+.map iframe{width:100%;height:320px;border:0;margin-top:20px;border-radius:15px;}
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        /* Hero Section */
+        .hero {
+
+        background: linear-gradient(135deg, var(--light-blue), var(--white));  
+            padding: 150px 0 100px;
+            text-align: center;    
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #003366;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        /* About Section */
+        .about {
+            background: var(--white);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+        }
+
+        .about-image img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-text h2 {
+            color: var(--primary-blue);
+        }
+
+        /* Services Section */
+        .services {
+            background: var(--light-gray);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        /* Skills Section */
+        .skills {
+            background: var(--white);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-category {
+            background: var(--light-gray);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .skill-item {
+            margin-bottom: 20px;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .skill-bar {
+            background: #e5e7eb;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .skill-level {
+            height: 100%;
+            background: var(--primary-blue);
+            border-radius: 5px;
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            background: var(--light-gray);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .portfolio-item {
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .portfolio-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .portfolio-content {
+            padding: 20px;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: var(--white);
+        }
+
+        .testimonial-slider {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .testimonial {
+            background: var(--light-gray);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* Contact Section */
+        .contact {
+            background: linear-gradient(135deg, var(--light-blue), var(--white));
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .contact-info {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-gray);
+            color: var(--white);
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: var(--white);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #374151;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+<div style="background-image: url('1sky.jpg'); background-size: cover; ; ">
+        <div class="container nav-container">
+            <a href="#home" class="logo"><img src="s.png" height="110" width="110" alt="LOGO" /></a>
+
+            <button class="mobile-menu-btn" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" role="navigation">
+                <li><a href="#home"><h3>Home</h3></a></li>
+                <li><a href="#about"><h3>About</h3></a></li>
+                <li><a href="#services"><h3>Services</h3></a></li>
+                <li><a href="#skills"><h3>Skills</h3></a></li>
+                <li><a href="#portfolio"><h3>Portfolio</h3></a></li>
+                <li><a href="#testimonials"><h3>Testimonials</h3></a></li>
+                <li><a href="#contact"><h3>Contact</h3></a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+</div>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+<div style="background-image: url('2server.jpg'); background-size: cover; ; padding: 150px 0 100px;">
+        <div class="container hero-content">
+            <h1>IT Support Specialist & Technical Problem Solver</h1>
+            <p>Delivering exceptional technical support and innovative solutions to optimize your business operations and infrastructure.</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn">Hire Me</a>
+                <a href="u.txt" class="btn btn-secondary">Download Resume</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-image animate-on-scroll">
+                    <img src="profile.jpg" alt="Professional IT support specialist in modern office environment with technical equipment and computers" />
+                </div>
+                <div class="about-text animate-on-scroll">
+                    <h2>Hello, I'm Isaac Emuna</h2>
+                    <p>With over 3 years of experience in IT support and system administration, I specialize in providing comprehensive technical solutions that drive business success. My expertise spans across network management, cybersecurity, cloud computing, and end-user support.</p>
+                    <p>I am passionate about leveraging technology to solve complex problems and improve operational efficiency. My approach combines technical expertise with excellent communication skills to ensure seamless technology integration and user satisfaction.</p>
+                    <p>Certifications: </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title">My Services</h2>
+            <div class="services-grid">
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Help Desk</h3>
+                    <p>Comprehensive hardware and software support, troubleshooting, and maintenance for optimal system performance.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3>Hardware Support</h3>
+                    <p>Installation, maintenance, and repair of physical devices (PCs, Printers, etc.).</p>
+                    <p>Hardware upgrades and diagnostics.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3>Network Management</h3>
+                    <p>Managing routers, switches, firewalls, and Wi-Fi.</p>
+                    <p>Monitoring and troubleshooting connectivity issues.</p>
+                    <p>Ensuring network performance and uptime.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>Cloud Solutions</h3>
+                    <p>Migrating, managing, and optimizing cloud infrastructure across various platforms and services.</p>
+                    <p>Like Google Workspace, Microsoft 365.</p>
+                    <p>Cloud backup and recovery.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Cyber Security</h3>
+                                       <p>Protecting IT systems and data from threats through tools like antivirus software, firewalls, and intrusion detection systems.</p>
+                    <p>Conducting regular security audits, vulnerability assessments, and user awareness training.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Remote Monitoring and Management (RMM)</h3>
+                    <p>I use special software to monitor and detect issues and performance tasks remotely.</p>
+                    <p>This enables proactive support through real-time alerts, system updates, and performance optimization without onsite intervention.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Device Management (MDM)</h3>
+                    <p>Provides centralized control over mobile devices such as smartphones and tablets used within an organization.</p>
+                    <p>Involves enforcing security policies, remote device tracking, data encryption, and remote wiping of lost or stolen devices.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-shield"></i>
+                    </div>
+                    <h3>User Account and Identity Management</h3>
+                    <p>Creating, managing, and securing user accounts and access rights across a system.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <h2 class="section-title">My Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-category animate-on-scroll">
+                    <h3>Operating Systems</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Windows Server</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Linux/Unix</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 55%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">macOS</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category animate-on-scroll">
+                    <h3>Networking</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">TCP/IP Networking</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Troubleshooting LAN/WAN issues</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">VPN/Remote Access</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category animate-on-scroll">
+                    <h3>System Administration (Basic)</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Managing User Accounts and Permissions</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">File and Print Server Support</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 70%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Remote Desktop Support</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category animate-on-scroll">
+                    <h3>Software Support</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Install and Configure Software Apps</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Troubleshooting Application Errors</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 80%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Software Patching and Updates</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category animate-on-scroll">
+                    <h3>Security</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Firewall Management</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 88%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Endpoint Protection</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Data Backup/Recovery</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2 class="section-title">Recent Projects</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item animate-on-scroll">
+                    <img src="profile1.jpg" alt="profile.jpg" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Network Infrastructure Upgrade</h3>
+                        <p>Complete network overhaul for a 200+ employee company, improving speed and security by 40%.</p>
+                   <a href="#home"><button  class="btn" ><h3>Click Here</h3></button></a>
+ </div>
+                </div>
+ <div class="portfolio-item animate-on-scroll">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c8a9a132-1959-46b6-89a0-e469dee24bba.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Hotspot Software Demo</h3>
+                        <p>A sleek demo interface simulating public Wi-Fi hostapot login. Built with html and css responsivey, it demonstrates user authentication, screens, sessions, smooth transitions
+for understanding real world network.</p>
+<a href="#home.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div>
+                </div>
+ <div class="portfolio-item animate-on-scroll">
+                    <img src="fixture.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Football fixture Generator</h3>
+                        <p>An interactive web-based tool to generate football match fixtures. Built with a clean and intuitive
+interface, it allows users to input teams and automatically schedule matches. Styled with
+modern CSS for ease of navigation and visual appeal..</p>
+<a href="fixture.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div></div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="Football.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Football Ticket</h3>
+                        <p>A practical web page that lets users create customized football match tickets. Featuring
+input forms and a stylish, print-ready design, this project focuses on creating reusable CSS
+components and responsive design for different devices</p>
+<a href="football.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div></div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="bus.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Secure Bus Ticketing System</h3>
+                        <p>A prototype interface showcasing secure bus ticket generation with unique codes and security
+badges. This project practices creating visual security cues and clean layouts, emphasizing
+usability and trustworthiness through thoughtful CSS styling.</p>
+<a href="Busticket.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div></div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="Camera Monitoring.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Camera Monitoring System</h3>
+                        <p>A front-end dashboard mimicking real-time camera monitoring systems. Utilizing CSS grid
+and flexbox for layout, it displays multiple camera feeds with control buttons and animated
+indicators, helping you learn to manage complex UI elements in a clean design.</p>
+<a href="camera_monitoring.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div>
+</div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="CV Maker.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>CV maker</h3>
+                        <p>A beginner-friendly CV builder that lets users input their details and instantly see a polished
+resume preview. It combines form handling basics with clean typography and layout principles,
+demonstrating how to build practical web tools using just HTML and CSS.</p>
+<a href="cv.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div>
+</div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="Logo.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Logo Maker</h3>
+                        <p>A A creative mini app where users can design simple logos by choosing shapes, colors, and text
+styles. This project explores CSS positioning, color theory, and user interface design basics,
+perfect for learning how to build fun and interactive front-end features.</p>
+<a href="logomaker.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div>
+</div>
+<div class="portfolio-item animate-on-scroll">
+                    <img src="traffic.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3> Traffic Lights Control System</h3>
+                        <p>An animated simulation of a traffic light system, showing smooth color transitions and timing
+sequences purely with CSS animations. This project teaches how to use keyframes and
+animation delays to mimic real-world systems in a visually engaging way.</p>
+<a href="traffic.html"><button  class="btn" ><h3>Click Here</h3></button></a>
+                    </div>
+</div>
+                <div class="portfolio-item animate-on-scroll">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c8a9a132-1959-46b6-89a0-e469dee24bba.png" alt="Cloud migration project dashboard showing successful data transfer and system integration" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Cloud Migration Project</h3>
+                        <p>Successfully migrated company data and applications to Azure cloud platform with zero downtime.</p>
+                   <a href="cv.html"> <button  class="btn" ><h3>CV APP</h3></button></a>
+</div>
+                </div>
+                <div class="portfolio-item animate-on-scroll">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f007b9a8-d58a-499a-b8c9-1f421ac340dc.png" alt="Cybersecurity implementation with multiple monitor setup showing threat detection and prevention systems" class="portfolio-image" />
+                    <div class="portfolio-content">
+                        <h3>Security Implementation</h3>
+                        <p>Implemented comprehensive cybersecurity framework reducing security incidents by 95%.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <h2 class="section-title">Client Testimonials</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial animate-on-scroll">
+                    <p class="testimonial-text">"Isaac's expertise in network management transformed our IT infrastructure. His proactive approach and technical knowledge have been invaluable to our business operations."</p>
+                    <p class="testimonial-author">- Daniel K, CEO at U...</p>
+                    <button class="btn" id="openModal">Read More</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Testimonials -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>More Testimonials</h2>
+            <p>"Isaac's support has been a game changer for our team. His ability to solve problems quickly and effectively has saved us countless hours of downtime."</p>
+            <p>- Mark Thompson, CTO at ...</p>
+            <p>"I highly recommend Isaac for any IT needs. His professionalism and dedication are unmatched!"</p>
+            <p>- Emily Davis, Operations Manager at ...</p>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info animate-on-scroll">
+                    <h3>Let's Discuss Your Project</h3>
+                    <p>I'm available for freelance projects and full-time opportunities. Feel free to reach out!</p>
+                    <p><i class="fas fa-envelope"></i> emuna.officials@gmail.com</p>
+                    <p><i class="fas fa-phone"></i> +256 784176181 / +25650156416</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Jinja, Uganda</p>
+                    <img src="s.png" height="200" width="200" alt="logo" />
+                </div>
+                <div class="contact-form animate-on-scroll">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+<div class="map"><iframe src="https://maps.google.com/maps?q=Jinja&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed" allowfullscreen></iframe></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Eitnerds</h3>
+                    <p>Providing exceptional technical support and innovative IT solutions for businesses of all sizes.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-links">
+                        <a href="https://wa.me/message/A457TWAZQ4S7H1"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2025 Emuna Isaac. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+
+        // Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! I will get back to you soon.');
+            this.reset();
+        });
+
+        // Scroll Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(element => {
+            observer.observe(element);
+        });
+
+        // Sticky Navigation
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.boxShadow = 'none';
+            }
+        });
+
+        // Modal for Testimonials
+        const modal = document.getElementById("myModal");
+        const btn = document.getElementById("openModal");
+        const span = document.getElementsByClassName("close")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "flex";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
